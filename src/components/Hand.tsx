@@ -2,12 +2,14 @@ import { motion } from 'framer-motion'
 import type { Card } from '../game/cards'
 import { evaluate } from '../game/handValue'
 import type { Outcome } from '../game/engine'
-import { PlayingCard } from './Card'
+import { PlayingCard, type DealFrom } from './Card'
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.12 } },
 }
+
+const DEFAULT_FROM: DealFrom = { x: 0, y: -50 }
 
 const OUTCOME_LABEL: Record<Outcome, string> = {
   win: 'Win',
@@ -31,6 +33,7 @@ interface HandProps {
   outcome?: Outcome | null
   bet?: number
   showValue?: boolean
+  from?: DealFrom
 }
 
 export function Hand({
@@ -38,6 +41,7 @@ export function Hand({
   active = false,
   outcome = null,
   showValue = true,
+  from = DEFAULT_FROM,
 }: HandProps) {
   if (cards.length === 0) return null
   const badge = valueBadge(cards)
@@ -57,7 +61,7 @@ export function Hand({
         animate="show"
       >
         {cards.map((card) => (
-          <PlayingCard key={card.id} card={card} />
+          <PlayingCard key={card.id} card={card} from={from} />
         ))}
       </motion.div>
       {outcome && (

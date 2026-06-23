@@ -2,8 +2,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useGameStore } from '../store/useGameStore'
 import { Hand } from './Hand'
 import { Chip } from './Chip'
+import type { DealFrom } from './Card'
 
 const DENOMS = [1000, 500, 100, 25, 5]
+
+// Approximate direction of the deck (top-right) from each zone, so cards
+// appear to be dealt out of the shoe.
+const DEALER_FROM: DealFrom = { x: 64, y: -36 }
+const PLAYER_FROM: DealFrom = { x: 78, y: -300 }
 
 /** Greedy breakdown of an amount into chip denominations, capped for display. */
 function chipStack(amount: number): number[] {
@@ -44,9 +50,15 @@ export function Table() {
 
   return (
     <div className="table">
+      <div className="deck" aria-hidden="true">
+        <span className="deck-card" />
+        <span className="deck-card" />
+        <span className="deck-card" />
+      </div>
+
       <section className="dealer-zone">
         <div className="zone-label">Dealer</div>
-        <Hand cards={dealer} showValue={dealer.length > 0} />
+        <Hand cards={dealer} showValue={dealer.length > 0} from={DEALER_FROM} />
       </section>
 
       <div className="table-center">
@@ -104,6 +116,7 @@ export function Table() {
                   cards={hand.cards}
                   active={i === activeIndex && phase === 'playerTurn'}
                   outcome={phase === 'settled' ? hand.outcome : null}
+                  from={PLAYER_FROM}
                 />
                 <div className="hand-bet">
                   <Chip value={hand.bet} size={26} label={`$${hand.bet}`} />
