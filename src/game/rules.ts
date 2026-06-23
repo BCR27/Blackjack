@@ -20,7 +20,7 @@ export const DEFAULT_RULES: Rules = {
   dealerHitsSoft17: false,
   blackjackPayout: 1.5,
   doubleAfterSplit: true,
-  surrenderAllowed: true,
+  surrenderAllowed: false,
   maxSplitHands: 4,
   resplitAces: false,
 }

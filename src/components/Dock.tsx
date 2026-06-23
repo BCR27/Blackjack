@@ -14,9 +14,11 @@ import { Chip } from './Chip'
 
 function BettingDock() {
   const game = useGameStore((s) => s.game)
+  const lastBet = useGameStore((s) => s.lastBet)
   const lastBonusDate = useGameStore((s) => s.lastBonusDate)
   const addChip = useGameStore((s) => s.addChip)
   const clearBet = useGameStore((s) => s.clearBet)
+  const rebet = useGameStore((s) => s.rebet)
   const deal = useGameStore((s) => s.deal)
   const claimDailyBonus = useGameStore((s) => s.claimDailyBonus)
   const resetBankroll = useGameStore((s) => s.resetBankroll)
@@ -74,6 +76,13 @@ function BettingDock() {
         >
           Deal
         </button>
+        <button
+          className="btn btn-ghost"
+          disabled={lastBet <= 0 || lastBet > bankroll}
+          onClick={rebet}
+        >
+          Rebet
+        </button>
       </div>
     </div>
   )
@@ -86,7 +95,6 @@ function ActionDock() {
   const stand = useGameStore((s) => s.stand)
   const double = useGameStore((s) => s.double)
   const split = useGameStore((s) => s.split)
-  const surrender = useGameStore((s) => s.surrender)
 
   const hand = activeHand(game)
   const recommended: Action | null =
@@ -103,11 +111,6 @@ function ActionDock() {
   return (
     <div className="dock-actions">
       <div className="action-row-secondary">
-        {canSurrender(game) && (
-          <button className={`btn btn-action${rec('surrender')}`} onClick={surrender}>
-            Surrender
-          </button>
-        )}
         {canDouble(game) && (
           <button className={`btn btn-action${rec('double')}`} onClick={double}>
             Double
