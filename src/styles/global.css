@@ -752,13 +752,19 @@ body {
   padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
   overflow: hidden;
 }
+.sheet-grabber-zone {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+  touch-action: none;
+  cursor: grab;
+}
 .sheet-grabber {
   width: 38px;
   height: 5px;
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.3);
-  margin: 9px auto 2px;
-  flex: none;
 }
 .sheet-header {
   display: flex;
