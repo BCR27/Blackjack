@@ -14,11 +14,9 @@ import { Chip } from './Chip'
 
 function BettingDock() {
   const game = useGameStore((s) => s.game)
-  const lastBet = useGameStore((s) => s.lastBet)
   const lastBonusDate = useGameStore((s) => s.lastBonusDate)
   const addChip = useGameStore((s) => s.addChip)
   const clearBet = useGameStore((s) => s.clearBet)
-  const rebet = useGameStore((s) => s.rebet)
   const deal = useGameStore((s) => s.deal)
   const claimDailyBonus = useGameStore((s) => s.claimDailyBonus)
   const resetBankroll = useGameStore((s) => s.resetBankroll)
@@ -76,13 +74,6 @@ function BettingDock() {
         >
           Deal
         </button>
-        <button
-          className="btn btn-ghost"
-          disabled={lastBet <= 0 || lastBet > bankroll}
-          onClick={rebet}
-        >
-          Rebet
-        </button>
       </div>
     </div>
   )
@@ -130,18 +121,18 @@ function ActionDock() {
       </div>
       <div className="action-row-primary">
         <button
-          className={`btn btn-hit${rec('hit')}`}
-          disabled={!canHit(game)}
-          onClick={hit}
-        >
-          Hit
-        </button>
-        <button
           className={`btn btn-stand${rec('stand')}`}
           disabled={!canHit(game)}
           onClick={stand}
         >
           Stand
+        </button>
+        <button
+          className={`btn btn-hit${rec('hit')}`}
+          disabled={!canHit(game)}
+          onClick={hit}
+        >
+          Hit
         </button>
       </div>
     </div>
