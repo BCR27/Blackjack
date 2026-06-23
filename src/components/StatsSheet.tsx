@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useDragControls } from 'framer-motion'
 import { useGameStore } from '../store/useGameStore'
 import { ACHIEVEMENTS } from '../game/stats'
 import { CloseIcon } from './icons'
@@ -18,6 +18,7 @@ export function StatsSheet({ onClose }: { onClose: () => void }) {
   const history = useGameStore((s) => s.history)
   const achievements = useGameStore((s) => s.achievements)
   const resetStats = useGameStore((s) => s.resetStats)
+  const dragControls = useDragControls()
 
   const cards: { label: string; value: string }[] = [
     { label: 'Hands', value: stats.hands.toLocaleString() },
@@ -36,6 +37,7 @@ export function StatsSheet({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
       onClick={onClose}
     >
       <motion.div
@@ -43,16 +45,23 @@ export function StatsSheet({ onClose }: { onClose: () => void }) {
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 360, damping: 38 }}
+        transition={{ type: 'spring', stiffness: 460, damping: 42 }}
         drag="y"
+        dragListener={false}
+        dragControls={dragControls}
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.6 }}
+        dragElastic={{ top: 0, bottom: 0.5 }}
         onDragEnd={(_, info) => {
           if (info.offset.y > 120) onClose()
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sheet-grabber" />
+        <div
+          className="sheet-grabber-zone"
+          onPointerDown={(e) => dragControls.start(e)}
+        >
+          <div className="sheet-grabber" />
+        </div>
         <div className="sheet-header">
           <h2>Stats</h2>
           <button className="icon-button" onClick={onClose} aria-label="Close">
