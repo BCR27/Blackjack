@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import {
+  activeHand,
   canDouble,
   canHit,
   canSplit,
@@ -24,14 +25,42 @@ import {
   STARTING_BANKROLL,
   type Rules,
 } from '../game/rules'
+import { basicStrategy, type Action } from '../game/strategy'
+import {
+  ACHIEVEMENTS,
+  DAILY_BONUS,
+  initialStats,
+  recordRound,
+  satisfiedAchievements,
+  today,
+  type HistoryEntry,
+  type Stats,
+} from '../game/stats'
 import { playSound, primeAudio, setSoundEnabled } from '../audio/sound'
 import { haptic, setHapticsEnabled } from '../audio/haptics'
+
+export type ThemeName = 'green' | 'midnight' | 'royal'
+export type CardBackName = 'classic' | 'gold' | 'crimson'
+
+export interface Toast {
+  id: number
+  text: string
+}
 
 interface Store {
   game: GameState
   soundEnabled: boolean
   hapticsEnabled: boolean
+  coachEnabled: boolean
+  countingEnabled: boolean
+  theme: ThemeName
+  cardBack: CardBackName
   lastBet: number
+  stats: Stats
+  history: HistoryEntry[]
+  achievements: string[]
+  lastBonusDate: string
+  toasts: Toast[]
 
   addChip: (value: number) => void
   clearBet: () => void
@@ -48,8 +77,15 @@ interface Store {
   updateRules: (patch: Partial<Rules>) => void
   toggleSound: () => void
   toggleHaptics: () => void
+  toggleCoach: () => void
+  toggleCounting: () => void
+  setTheme: (theme: ThemeName) => void
+  setCardBack: (cardBack: CardBackName) => void
+  claimDailyBonus: () => void
+  dismissToast: (id: number) => void
   resetBankroll: () => void
-  syncAudioSettings: () => void
+  resetStats: () => void
+  syncSettings: () => void
 }
 
 const DEAL_TICK_MS = 230
@@ -57,7 +93,12 @@ const DEALER_REVEAL_MS = 550
 const DEALER_DRAW_MS = 650
 const RESULT_DELAY_MS = 450
 
-/** Play a satisfying staggered deal cadence for `count` cards. */
+let toastSeq = 0
+const nextToastId = (): number => {
+  toastSeq += 1
+  return toastSeq
+}
+
 function dealCadence(count: number): void {
   for (let i = 0; i < count; i += 1) {
     window.setTimeout(() => playSound('deal'), i * DEAL_TICK_MS)
@@ -90,7 +131,53 @@ function announceResult(game: GameState): void {
 export const useGameStore = create<Store>()(
   persist(
     (set, get) => {
-      /** Drive the dealer's turn one card at a time, then settle. */
+      /** Toast any achievements newly satisfied by the current state. */
+      const checkAchievements = (): void => {
+        const { stats, achievements, countingEnabled, game } = get()
+        const now = satisfiedAchievements({
+          stats,
+          bankroll: game.bankroll,
+          countingEnabled,
+        })
+        const fresh = now.filter((id) => !achievements.includes(id))
+        if (fresh.length === 0) return
+        const toasts = [...get().toasts]
+        for (const id of fresh) {
+          const a = ACHIEVEMENTS.find((x) => x.id === id)
+          if (a) toasts.push({ id: nextToastId(), text: `🏆 ${a.title}` })
+        }
+        set({ achievements: [...achievements, ...fresh], toasts })
+        haptic('success')
+      }
+
+      /** Finalize a settled round: fold stats, sounds, achievements. */
+      const onSettled = (game: GameState): void => {
+        const { stats, history } = get()
+        const { stats: nextStats, entry } = recordRound(stats, game)
+        set({ stats: nextStats, history: [entry, ...history].slice(0, 50) })
+        announceResult(game)
+        checkAchievements()
+      }
+
+      /** Compare a player's action to basic strategy for accuracy tracking. */
+      const recordDecision = (game: GameState, action: Action): void => {
+        const hand = activeHand(game)
+        if (game.phase !== 'playerTurn' || !hand) return
+        const recommended = basicStrategy(hand.cards, game.dealer[0], game.rules, {
+          canDouble: canDouble(game),
+          canSplit: canSplit(game),
+          canSurrender: canSurrender(game),
+        })
+        const { stats } = get()
+        set({
+          stats: {
+            ...stats,
+            decisions: stats.decisions + 1,
+            correct: stats.correct + (recommended === action ? 1 : 0),
+          },
+        })
+      }
+
       const runDealer = (): void => {
         playSound('flip')
         const step = (): void => {
@@ -103,7 +190,7 @@ export const useGameStore = create<Store>()(
           } else {
             const settled = concludeRound(get().game)
             set({ game: settled })
-            announceResult(settled)
+            onSettled(settled)
           }
         }
         window.setTimeout(step, DEALER_REVEAL_MS)
@@ -112,14 +199,23 @@ export const useGameStore = create<Store>()(
       const afterPlayerAction = (g: GameState): void => {
         set({ game: g })
         if (g.phase === 'dealerTurn') runDealer()
-        else if (g.phase === 'settled') announceResult(g)
+        else if (g.phase === 'settled') onSettled(g)
       }
 
       return {
         game: createInitialState(DEFAULT_RULES, STARTING_BANKROLL),
         soundEnabled: true,
         hapticsEnabled: true,
+        coachEnabled: false,
+        countingEnabled: false,
+        theme: 'green',
+        cardBack: 'classic',
         lastBet: 0,
+        stats: initialStats,
+        history: [],
+        achievements: [],
+        lastBonusDate: '',
+        toasts: [],
 
         addChip: (value) => {
           const { game } = get()
@@ -156,12 +252,13 @@ export const useGameStore = create<Store>()(
           set({ game: next, lastBet: game.bet })
           dealCadence(4)
           haptic('medium')
-          if (next.phase === 'settled') announceResult(next)
+          if (next.phase === 'settled') onSettled(next)
         },
 
         hit: () => {
           const { game } = get()
           if (!canHit(game)) return
+          recordDecision(game, 'hit')
           const idx = game.activeIndex
           const next = engineHit(game)
           playSound('deal')
@@ -176,6 +273,7 @@ export const useGameStore = create<Store>()(
         stand: () => {
           const { game } = get()
           if (!canHit(game)) return
+          recordDecision(game, 'stand')
           playSound('button')
           haptic('light')
           afterPlayerAction(engineStand(game))
@@ -184,6 +282,7 @@ export const useGameStore = create<Store>()(
         double: () => {
           const { game } = get()
           if (!canDouble(game)) return
+          recordDecision(game, 'double')
           const idx = game.activeIndex
           const next = engineDouble(game)
           playSound('chip')
@@ -199,6 +298,7 @@ export const useGameStore = create<Store>()(
         split: () => {
           const { game } = get()
           if (!canSplit(game)) return
+          recordDecision(game, 'split')
           playSound('chip')
           dealCadence(2)
           haptic('medium')
@@ -208,6 +308,7 @@ export const useGameStore = create<Store>()(
         surrender: () => {
           const { game } = get()
           if (!canSurrender(game)) return
+          recordDecision(game, 'surrender')
           playSound('lose')
           haptic('warning')
           afterPlayerAction(engineSurrender(game))
@@ -223,7 +324,6 @@ export const useGameStore = create<Store>()(
         updateRules: (patch) => {
           const { game } = get()
           const rules = { ...game.rules, ...patch }
-          // Changing deck count requires a fresh shoe.
           const shoe =
             patch.decks !== undefined && patch.decks !== game.rules.decks
               ? []
@@ -249,18 +349,59 @@ export const useGameStore = create<Store>()(
           if (value) haptic('medium')
         },
 
-        resetBankroll: () => {
+        toggleCoach: () => {
+          set({ coachEnabled: !get().coachEnabled })
+          haptic('light')
+        },
+
+        toggleCounting: () => {
+          set({ countingEnabled: !get().countingEnabled })
+          haptic('light')
+          checkAchievements()
+        },
+
+        setTheme: (theme) => {
+          set({ theme })
+          haptic('light')
+        },
+
+        setCardBack: (cardBack) => {
+          set({ cardBack })
+          haptic('light')
+        },
+
+        claimDailyBonus: () => {
+          if (get().lastBonusDate === today()) return
           const { game } = get()
           set({
-            game: {
-              ...createInitialState(game.rules, STARTING_BANKROLL),
-            },
+            game: { ...game, bankroll: game.bankroll + DAILY_BONUS },
+            lastBonusDate: today(),
+            toasts: [
+              ...get().toasts,
+              { id: nextToastId(), text: `Daily bonus +$${DAILY_BONUS}` },
+            ],
           })
+          playSound('win')
+          haptic('success')
+        },
+
+        dismissToast: (id) => {
+          set({ toasts: get().toasts.filter((t) => t.id !== id) })
+        },
+
+        resetBankroll: () => {
+          const { game } = get()
+          set({ game: createInitialState(game.rules, STARTING_BANKROLL) })
           playSound('chip')
           haptic('success')
         },
 
-        syncAudioSettings: () => {
+        resetStats: () => {
+          set({ stats: initialStats, history: [], achievements: [] })
+          haptic('medium')
+        },
+
+        syncSettings: () => {
           setSoundEnabled(get().soundEnabled)
           setHapticsEnabled(get().hapticsEnabled)
         },
@@ -268,25 +409,38 @@ export const useGameStore = create<Store>()(
     },
     {
       name: 'blackjack-state-v1',
-      version: 1,
+      version: 2,
       partialize: (s) => ({
         bankroll: s.game.bankroll,
         rules: s.game.rules,
         lastBet: s.lastBet,
         soundEnabled: s.soundEnabled,
         hapticsEnabled: s.hapticsEnabled,
+        coachEnabled: s.coachEnabled,
+        countingEnabled: s.countingEnabled,
+        theme: s.theme,
+        cardBack: s.cardBack,
+        stats: s.stats,
+        history: s.history,
+        achievements: s.achievements,
+        lastBonusDate: s.lastBonusDate,
       }),
       merge: (persisted, current) => {
-        const p = persisted as
-          | Partial<{
-              bankroll: number
-              rules: Rules
-              lastBet: number
-              soundEnabled: boolean
-              hapticsEnabled: boolean
-            }>
-          | undefined
-        if (!p) return current
+        const p = (persisted ?? {}) as Partial<{
+          bankroll: number
+          rules: Rules
+          lastBet: number
+          soundEnabled: boolean
+          hapticsEnabled: boolean
+          coachEnabled: boolean
+          countingEnabled: boolean
+          theme: ThemeName
+          cardBack: CardBackName
+          stats: Stats
+          history: HistoryEntry[]
+          achievements: string[]
+          lastBonusDate: string
+        }>
         const rules = { ...DEFAULT_RULES, ...(p.rules ?? {}) }
         const bankroll =
           typeof p.bankroll === 'number' ? p.bankroll : STARTING_BANKROLL
@@ -299,6 +453,14 @@ export const useGameStore = create<Store>()(
           lastBet,
           soundEnabled: p.soundEnabled ?? true,
           hapticsEnabled: p.hapticsEnabled ?? true,
+          coachEnabled: p.coachEnabled ?? false,
+          countingEnabled: p.countingEnabled ?? false,
+          theme: p.theme ?? 'green',
+          cardBack: p.cardBack ?? 'classic',
+          stats: { ...initialStats, ...(p.stats ?? {}) },
+          history: p.history ?? [],
+          achievements: p.achievements ?? [],
+          lastBonusDate: p.lastBonusDate ?? '',
         }
       },
     },

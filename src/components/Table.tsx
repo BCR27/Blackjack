@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useGameStore } from '../store/useGameStore'
 import { Hand } from './Hand'
 import { Chip } from './Chip'
+import { CountHUD } from './CountHUD'
 import type { DealFrom } from './Card'
 
 const DENOMS = [1000, 500, 100, 25, 5]
@@ -50,6 +51,7 @@ export function Table() {
 
   return (
     <div className="table">
+      <CountHUD />
       <div className="deck" aria-hidden="true">
         <span className="deck-card" />
         <span className="deck-card" />

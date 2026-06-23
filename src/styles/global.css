@@ -11,6 +11,36 @@
   --card-h: 94px;
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
     'Segoe UI', Roboto, system-ui, sans-serif;
+
+  --cardback-bg: #0a4d2c;
+  --cardback-accent: rgba(236, 202, 125, 0.55);
+  --cardback-pattern: rgba(236, 202, 125, 0.08);
+}
+
+/* Table themes */
+[data-theme='midnight'] {
+  --green-felt-1: #2b313d;
+  --green-felt-2: #1c212b;
+  --green-felt-3: #12161d;
+  --green-felt-4: #0a0c11;
+}
+[data-theme='royal'] {
+  --green-felt-1: #2161a8;
+  --green-felt-2: #16487e;
+  --green-felt-3: #0e3158;
+  --green-felt-4: #08203c;
+}
+
+/* Card-back styles */
+[data-cardback='gold'] {
+  --cardback-bg: #6e5212;
+  --cardback-accent: rgba(255, 243, 210, 0.72);
+  --cardback-pattern: rgba(255, 243, 210, 0.13);
+}
+[data-cardback='crimson'] {
+  --cardback-bg: #6e1717;
+  --cardback-accent: rgba(255, 214, 214, 0.62);
+  --cardback-pattern: rgba(255, 224, 224, 0.11);
 }
 
 * {
@@ -150,17 +180,18 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.bankroll,
-.wordmark,
-.header .icon-button {
+.bankroll {
   flex: 1 1 0;
 }
 .wordmark {
   flex: 0 0 auto;
   margin: 0 auto;
 }
-.header .icon-button {
-  flex: 0 0 auto;
+.header-actions {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 /* ------------------------------------------------------------------ Table */
@@ -364,7 +395,7 @@ body {
 
 .card-back {
   transform: rotateY(180deg);
-  background: #0a4d2c;
+  background: var(--cardback-bg);
   box-shadow: 0 3px 7px rgba(0, 0, 0, 0.35);
   padding: 4px;
 }
@@ -372,20 +403,20 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 6px;
-  border: 1.5px solid rgba(236, 202, 125, 0.55);
+  border: 1.5px solid var(--cardback-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(236, 202, 125, 0.85);
+  color: var(--cardback-accent);
   font-size: calc(var(--card-w) * 0.4);
   background-image: repeating-linear-gradient(
       45deg,
-      rgba(236, 202, 125, 0.08) 0 5px,
+      var(--cardback-pattern) 0 5px,
       transparent 5px 10px
     ),
     repeating-linear-gradient(
       -45deg,
-      rgba(236, 202, 125, 0.08) 0 5px,
+      var(--cardback-pattern) 0 5px,
       transparent 5px 10px
     );
 }
@@ -405,17 +436,17 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 7px;
-  background: #0a4d2c;
-  border: 1.5px solid rgba(236, 202, 125, 0.4);
+  background: var(--cardback-bg);
+  border: 1.5px solid var(--cardback-accent);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
   background-image: repeating-linear-gradient(
       45deg,
-      rgba(236, 202, 125, 0.08) 0 4px,
+      var(--cardback-pattern) 0 4px,
       transparent 4px 8px
     ),
     repeating-linear-gradient(
       -45deg,
-      rgba(236, 202, 125, 0.08) 0 4px,
+      var(--cardback-pattern) 0 4px,
       transparent 4px 8px
     );
 }
@@ -850,6 +881,206 @@ body {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* --------------------------------------------------------------- Count HUD */
+
+.count-hud {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 11px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+}
+.count-hud-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.count-hud-values {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.count-hud-running {
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.count-hud-true {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+.count-hud-hidden {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 2px 0;
+}
+
+/* ----------------------------------------------------------------- Toasts */
+
+.toast-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + 96px);
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: rgba(20, 20, 22, 0.86);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 18px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(236, 202, 125, 0.35);
+}
+
+/* --------------------------------------------------------- Coach highlight */
+
+.btn.is-rec {
+  box-shadow: 0 0 0 2px var(--gold), 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.btn.is-rec::after {
+  content: '★';
+  font-size: 11px;
+  margin-left: 6px;
+  color: var(--gold);
+  vertical-align: middle;
+}
+.btn-hit.is-rec::after,
+.btn-stand.is-rec::after {
+  color: #fff;
+}
+
+/* ------------------------------------------------------------ Daily bonus */
+
+.daily-bonus {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid rgba(236, 202, 125, 0.5);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(236, 202, 125, 0.22), rgba(236, 202, 125, 0.1));
+  color: var(--gold);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.daily-bonus:active {
+  transform: scale(0.98);
+}
+
+/* --------------------------------------------------------- Settings extras */
+
+.settings-row-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+}
+
+/* ------------------------------------------------------------ Stats sheet */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 6px;
+}
+.stat-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.achievement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.achievement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0.55;
+}
+.achievement.is-unlocked {
+  opacity: 1;
+  background: rgba(236, 202, 125, 0.12);
+}
+.achievement-icon {
+  font-size: 20px;
+}
+.achievement-text {
+  display: flex;
+  flex-direction: column;
+}
+.achievement-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.achievement-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.history-row {
+  font-size: 15px;
+}
+.history-bet {
+  color: rgba(255, 255, 255, 0.45);
+}
+.history-net {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.history-net.pos {
+  color: var(--gold);
+}
+.history-net.neg {
+  color: #ff8f7e;
+}
+.history-empty {
+  color: rgba(255, 255, 255, 0.5);
+  justify-content: center;
 }
 
 /* ----------------------------------------------------------- Small phones */
