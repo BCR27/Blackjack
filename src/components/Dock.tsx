@@ -127,28 +127,6 @@ function ActionDock() {
   )
 }
 
-function InsuranceDock() {
-  const bet = useGameStore((s) => s.game.bet)
-  const takeInsurance = useGameStore((s) => s.takeInsurance)
-  const cost = Math.floor(bet / 2)
-
-  return (
-    <div className="dock-insurance">
-      <p className="insurance-prompt">
-        Dealer shows an Ace. Take insurance for ${cost}?
-      </p>
-      <div className="action-row-primary">
-        <button className="btn btn-ghost" onClick={() => takeInsurance(false)}>
-          No thanks
-        </button>
-        <button className="btn btn-primary" onClick={() => takeInsurance(true)}>
-          Insurance
-        </button>
-      </div>
-    </div>
-  )
-}
-
 function SettledDock() {
   const nextRound = useGameStore((s) => s.nextRound)
   return (
@@ -173,7 +151,6 @@ export function Dock() {
     >
       {phase === 'betting' && <BettingDock />}
       {phase === 'playerTurn' && <ActionDock />}
-      {phase === 'insurance' && <InsuranceDock />}
       {phase === 'settled' && <SettledDock />}
       {phase === 'dealerTurn' && (
         <div className="dock-status">Dealer plays…</div>

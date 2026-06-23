@@ -3,7 +3,7 @@ import { buildShuffledShoe, rankValue } from './cards'
 import { evaluate, isBlackjack } from './handValue'
 import type { Rules } from './rules'
 
-export type Phase = 'betting' | 'insurance' | 'playerTurn' | 'dealerTurn' | 'settled'
+export type Phase = 'betting' | 'playerTurn' | 'dealerTurn' | 'settled'
 
 export type Outcome =
   | 'win'
@@ -30,7 +30,6 @@ export interface RoundResult {
   /** Net change to the bankroll for the whole round (after all wagers). */
   net: number
   dealerBlackjack: boolean
-  insuranceWon: boolean
 }
 
 export interface GameState {
@@ -43,8 +42,6 @@ export interface GameState {
   bankroll: number
   /** During betting this is the pending wager; once dealt it is the base bet. */
   bet: number
-  insurance: number
-  insuranceResolved: boolean
   roundResult: RoundResult | null
   roundId: number
   /** True for the round immediately following an automatic reshuffle. */
@@ -67,8 +64,6 @@ export function createInitialState(rules: Rules, bankroll: number): GameState {
     phase: 'betting',
     bankroll,
     bet: 0,
-    insurance: 0,
-    insuranceResolved: false,
     roundResult: null,
     roundId: 0,
     reshuffled: false,
@@ -117,8 +112,6 @@ export function deal(state: GameState): GameState {
   ensureShoe(s)
 
   s.bankroll -= s.bet
-  s.insurance = 0
-  s.insuranceResolved = false
   s.roundResult = null
 
   const hand: PlayerHand = {
@@ -144,13 +137,11 @@ export function deal(state: GameState): GameState {
   const dealerUp = s.dealer[0]
   const playerBlackjack = isBlackjack(hand.cards)
 
-  if (dealerUp.rank === 'A') {
-    // Offer insurance before peeking for blackjack.
-    s.phase = 'insurance'
-    return s
-  }
-
-  if (rankValue(dealerUp.rank) === 10 && isBlackjack(s.dealer)) {
+  // Dealer peeks for blackjack on an ace or ten-value up-card.
+  if (
+    (dealerUp.rank === 'A' || rankValue(dealerUp.rank) === 10) &&
+    isBlackjack(s.dealer)
+  ) {
     return concludeRound(s)
   }
 
@@ -158,26 +149,6 @@ export function deal(state: GameState): GameState {
     return concludeRound(s)
   }
 
-  s.phase = 'playerTurn'
-  s.activeIndex = 0
-  return s
-}
-
-export function decideInsurance(state: GameState, take: boolean): GameState {
-  const s = cloneState(state)
-  if (take) {
-    const amount = Math.floor(s.hands[0].bet / 2)
-    s.insurance = amount
-    s.bankroll -= amount
-  }
-  s.insuranceResolved = true
-
-  if (isBlackjack(s.dealer)) {
-    return concludeRound(s)
-  }
-  if (isBlackjack(s.hands[0].cards)) {
-    return concludeRound(s)
-  }
   s.phase = 'playerTurn'
   s.activeIndex = 0
   return s
@@ -356,13 +327,7 @@ export function concludeRound(state: GameState): GameState {
   const dealerBlackjack = isBlackjack(s.dealer)
 
   let returned = 0
-  let wagered = s.insurance
-  let insuranceWon = false
-
-  if (s.insurance > 0 && dealerBlackjack) {
-    returned += s.insurance * 3 // stake back + 2:1
-    insuranceWon = true
-  }
+  let wagered = 0
 
   for (const hand of s.hands) {
     wagered += hand.bet
@@ -411,7 +376,6 @@ export function concludeRound(state: GameState): GameState {
   s.roundResult = {
     net: returned - wagered,
     dealerBlackjack,
-    insuranceWon,
   }
   s.phase = 'settled'
   s.activeIndex = -1
@@ -424,8 +388,6 @@ export function nextRound(state: GameState): GameState {
   s.dealer = []
   s.hands = []
   s.activeIndex = -1
-  s.insurance = 0
-  s.insuranceResolved = false
   s.roundResult = null
   s.phase = 'betting'
   s.bet = Math.min(s.bet, s.bankroll)

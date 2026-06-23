@@ -9,7 +9,6 @@ import {
   dealerHit,
   dealerShouldHit,
   deal as engineDeal,
-  decideInsurance,
   double as engineDouble,
   hit as engineHit,
   nextRound as engineNextRound,
@@ -44,7 +43,6 @@ interface Store {
   double: () => void
   split: () => void
   surrender: () => void
-  takeInsurance: (take: boolean) => void
   nextRound: () => void
 
   updateRules: (patch: Partial<Rules>) => void
@@ -213,17 +211,6 @@ export const useGameStore = create<Store>()(
           playSound('lose')
           haptic('warning')
           afterPlayerAction(engineSurrender(game))
-        },
-
-        takeInsurance: (take) => {
-          const { game } = get()
-          if (game.phase !== 'insurance') return
-          if (take) playSound('chip')
-          else playSound('button')
-          haptic('light')
-          const next = decideInsurance(game, take)
-          set({ game: next })
-          if (next.phase === 'settled') announceResult(next)
         },
 
         nextRound: () => {
