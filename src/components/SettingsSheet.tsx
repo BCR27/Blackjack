@@ -54,9 +54,17 @@ export function SettingsSheet({ onClose }: SettingsSheetProps) {
   const rules = useGameStore((s) => s.game.rules)
   const soundEnabled = useGameStore((s) => s.soundEnabled)
   const hapticsEnabled = useGameStore((s) => s.hapticsEnabled)
+  const coachEnabled = useGameStore((s) => s.coachEnabled)
+  const countingEnabled = useGameStore((s) => s.countingEnabled)
+  const theme = useGameStore((s) => s.theme)
+  const cardBack = useGameStore((s) => s.cardBack)
   const updateRules = useGameStore((s) => s.updateRules)
   const toggleSound = useGameStore((s) => s.toggleSound)
   const toggleHaptics = useGameStore((s) => s.toggleHaptics)
+  const toggleCoach = useGameStore((s) => s.toggleCoach)
+  const toggleCounting = useGameStore((s) => s.toggleCounting)
+  const setTheme = useGameStore((s) => s.setTheme)
+  const setCardBack = useGameStore((s) => s.setCardBack)
   const resetBankroll = useGameStore((s) => s.resetBankroll)
 
   return (
@@ -148,6 +156,54 @@ export function SettingsSheet({ onClose }: SettingsSheetProps) {
               <Toggle
                 checked={rules.resplitAces}
                 onChange={() => updateRules({ resplitAces: !rules.resplitAces })}
+              />
+            </div>
+          </div>
+
+          <div className="settings-section-title">Coaching</div>
+          <div className="settings-group">
+            <div className="settings-row">
+              <span>
+                Strategy hints
+                <span className="settings-row-sub">
+                  Highlight the optimal play
+                </span>
+              </span>
+              <Toggle checked={coachEnabled} onChange={toggleCoach} />
+            </div>
+            <div className="settings-row">
+              <span>
+                Card-counting trainer
+                <span className="settings-row-sub">Show the live Hi-Lo count</span>
+              </span>
+              <Toggle checked={countingEnabled} onChange={toggleCounting} />
+            </div>
+          </div>
+
+          <div className="settings-section-title">Appearance</div>
+          <div className="settings-group">
+            <div className="settings-row settings-row-stacked">
+              <span>Table</span>
+              <Segmented
+                value={theme}
+                onChange={setTheme}
+                options={[
+                  { label: 'Green', value: 'green' as const },
+                  { label: 'Midnight', value: 'midnight' as const },
+                  { label: 'Royal', value: 'royal' as const },
+                ]}
+              />
+            </div>
+            <div className="settings-row settings-row-stacked">
+              <span>Card backs</span>
+              <Segmented
+                value={cardBack}
+                onChange={setCardBack}
+                options={[
+                  { label: 'Classic', value: 'classic' as const },
+                  { label: 'Gold', value: 'gold' as const },
+                  { label: 'Crimson', value: 'crimson' as const },
+                ]}
               />
             </div>
           </div>

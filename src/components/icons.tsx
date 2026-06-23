@@ -39,6 +39,27 @@ export function CloseIcon({ size = 22, className }: IconProps) {
   )
 }
 
+export function ChartIcon({ size = 22, className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M3 3v18h18" />
+      <rect x="7" y="11" width="3" height="6" rx="0.6" fill="currentColor" stroke="none" />
+      <rect x="12.5" y="7" width="3" height="10" rx="0.6" fill="currentColor" stroke="none" />
+      <rect x="18" y="13" width="3" height="4" rx="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function ChevronIcon({ size = 18, className }: IconProps) {
   return (
     <svg
