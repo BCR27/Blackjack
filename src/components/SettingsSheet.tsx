@@ -143,15 +143,6 @@ export function SettingsSheet({ onClose }: SettingsSheetProps) {
               />
             </div>
             <div className="settings-row">
-              <span>Late surrender</span>
-              <Toggle
-                checked={rules.surrenderAllowed}
-                onChange={() =>
-                  updateRules({ surrenderAllowed: !rules.surrenderAllowed })
-                }
-              />
-            </div>
-            <div className="settings-row">
               <span>Re-split aces</span>
               <Toggle
                 checked={rules.resplitAces}

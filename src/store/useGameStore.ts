@@ -441,7 +441,9 @@ export const useGameStore = create<Store>()(
           achievements: string[]
           lastBonusDate: string
         }>
-        const rules = { ...DEFAULT_RULES, ...(p.rules ?? {}) }
+        // Surrender has been removed from the game; force it off even for
+        // returning players who previously had it enabled.
+        const rules = { ...DEFAULT_RULES, ...(p.rules ?? {}), surrenderAllowed: false }
         const bankroll =
           typeof p.bankroll === 'number' ? p.bankroll : STARTING_BANKROLL
         const lastBet = p.lastBet ?? 0
