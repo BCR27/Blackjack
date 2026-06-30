@@ -48,6 +48,7 @@ export function Table() {
 
   const showBetCircle = phase === 'betting'
   const result = phase === 'settled' ? roundResult : null
+  const hasBlackjack = hands.some((h) => h.outcome === 'blackjack')
 
   return (
     <div className="table">
@@ -86,7 +87,13 @@ export function Table() {
               transition={{ type: 'spring', stiffness: 320, damping: 24 }}
             >
               <span className="result-title">
-                {result.net > 0 ? 'You win' : result.net < 0 ? 'Dealer wins' : 'Push'}
+                {result.net > 0
+                  ? hasBlackjack
+                    ? 'Blackjack!'
+                    : 'You win'
+                  : result.net < 0
+                    ? 'Dealer wins'
+                    : 'Push'}
               </span>
               {result.net !== 0 && (
                 <span className="result-amount">
@@ -121,7 +128,7 @@ export function Table() {
                   from={PLAYER_FROM}
                 />
                 <div className="hand-bet">
-                  <Chip value={hand.bet} size={26} label={`$${hand.bet}`} />
+                  <Chip value={hand.bet} size={28} />
                 </div>
               </div>
             ))}

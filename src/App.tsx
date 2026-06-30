@@ -5,12 +5,14 @@ import { Table } from './components/Table'
 import { Dock } from './components/Dock'
 import { SettingsSheet } from './components/SettingsSheet'
 import { StatsSheet } from './components/StatsSheet'
+import { GuideSheet } from './components/GuideSheet'
 import { Toasts } from './components/Toasts'
 import { useGameStore } from './store/useGameStore'
 
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [statsOpen, setStatsOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
   const syncSettings = useGameStore((s) => s.syncSettings)
   const theme = useGameStore((s) => s.theme)
   const cardBack = useGameStore((s) => s.cardBack)
@@ -29,6 +31,7 @@ export default function App() {
       <Header
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenStats={() => setStatsOpen(true)}
+        onOpenGuide={() => setGuideOpen(true)}
       />
       <Table />
       <Dock />
@@ -38,6 +41,7 @@ export default function App() {
           <SettingsSheet onClose={() => setSettingsOpen(false)} />
         )}
         {statsOpen && <StatsSheet onClose={() => setStatsOpen(false)} />}
+        {guideOpen && <GuideSheet onClose={() => setGuideOpen(false)} />}
       </AnimatePresence>
     </div>
   )
