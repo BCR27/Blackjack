@@ -6,16 +6,21 @@ chips and bankroll, sound and haptics — no accounts, no tracking, fully offlin
 
 ## Features
 
-- **Full table play** — hit, stand, double down, split (incl. split aces),
-  insurance, and late surrender.
+- **Full table play** — hit, stand, double down, split (incl. split aces).
 - **Chips & bankroll** — place bets with chip stacks; balance is saved on your
-  device.
-- **Configurable house rules** — decks (1/2/6/8), dealer hits/stands soft 17,
-  blackjack pays 3:2 or 6:5, double-after-split, late surrender, re-split aces.
+  device. Come back daily for an escalating streak bonus.
+- **Difficulty, quantified** — a single slider (Easy → Vegas) bundles the house
+  rules and shows the resulting house edge, so you always know the odds. Power
+  users can still tune every rule under *Custom rules*.
+- **How to play & strategy** — a built-in guide with a colour-coded basic
+  strategy chart, generated from the same engine that powers the live coach.
+- **Coaching** — optional strategy hints and a live Hi-Lo card-counting trainer.
+- **Stats & achievements** — win rate, streaks, strategy accuracy, recent hands,
+  and unlockable achievements, all stored locally.
 - **Sound & haptics** — synthesized card/chip sounds (no audio files) and
   best-effort haptic feedback.
-- **Installable PWA** — add to your iPhone home screen for a full-screen,
-  native-feeling experience that works offline.
+- **Installable PWA** — add to your home screen for a full-screen, native-feeling
+  experience that works offline, and a framed phone-width layout on the desktop.
 
 ## Tech
 
@@ -43,6 +48,8 @@ npm run icons      # regenerate the app icons (pure Node, no deps)
 ## Game rules
 
 Standard Vegas blackjack. The dealer peeks for blackjack on a ten or ace
-up-card, blackjacks pay 3:2 by default, and all rules can be changed in the
-in-app Settings sheet. Engine payout logic is covered by a headless test suite
-(money conservation is verified across 50,000 simulated rounds).
+up-card and blackjacks pay 3:2 by default. Pick a difficulty for a balanced
+rule set, or open *Custom rules* in Settings to change deck count, dealer
+soft-17, payout (3:2 / 6:5), double-after-split, and re-split aces. The payout
+engine settles money by construction — every wager is returned, won, or lost
+exactly once per round — and the cards are dealt from a fairly shuffled shoe.

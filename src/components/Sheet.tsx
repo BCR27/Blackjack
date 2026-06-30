@@ -1,4 +1,8 @@
-import { type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import {
+  useEffect,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import { animate, motion, useMotionValue } from 'framer-motion'
 import { CloseIcon } from './icons'
 
@@ -16,6 +20,15 @@ interface SheetProps {
  */
 export function Sheet({ title, onClose, children }: SheetProps) {
   const dragY = useMotionValue(0)
+
+  // Close on Escape — this also runs as an installable web app on the desktop.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   const startDrag = (e: ReactPointerEvent) => {
     const startY = e.clientY
@@ -41,6 +54,9 @@ export function Sheet({ title, onClose, children }: SheetProps) {
     >
       <motion.div
         className="sheet-slide"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}

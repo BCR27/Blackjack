@@ -71,12 +71,15 @@ body {
 #root {
   height: 100%;
   display: flex;
+  justify-content: center;
 }
 
 /* ----------------------------------------------------------------- Layout */
 
 .app {
   flex: 1;
+  width: 100%;
+  max-width: 480px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -740,9 +743,11 @@ body {
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: flex-end;
+  justify-content: center;
 }
 .sheet-slide {
   width: 100%;
+  max-width: 480px;
 }
 .sheet {
   width: 100%;
@@ -1092,6 +1097,255 @@ body {
   justify-content: center;
 }
 
+/* ------------------------------------------------------- Difficulty slider */
+
+.settings-group-pad {
+  padding: 16px;
+}
+.difficulty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.difficulty-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.difficulty-name {
+  font-size: 20px;
+  font-weight: 800;
+}
+.difficulty-edge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+.difficulty-edge-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.difficulty-edge-tag {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.difficulty-blurb {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.6);
+  min-height: 36px;
+}
+.difficulty-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  margin: 4px 0 0;
+  background: linear-gradient(90deg, #1aa85c 0%, #e0b53f 52%, #c0392b 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.difficulty-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff, #e3e3e3);
+  border: 2px solid var(--gold-deep);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+.difficulty-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff, #e3e3e3);
+  border: 2px solid var(--gold-deep);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+.difficulty-ticks {
+  display: flex;
+  justify-content: space-between;
+}
+.difficulty-tick {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  border-radius: 8px;
+}
+.difficulty-tick:first-child {
+  text-align: left;
+}
+.difficulty-tick:last-child {
+  text-align: right;
+}
+.difficulty-tick.is-active {
+  color: var(--gold);
+}
+
+/* Collapsible custom-rules disclosure */
+.disclosure-chevron {
+  color: rgba(255, 255, 255, 0.45);
+  transition: transform 0.2s;
+}
+.disclosure-chevron.is-open {
+  transform: rotate(90deg);
+}
+
+/* Two-tap confirm on destructive rows */
+.settings-row-button.is-confirming span,
+.settings-row-button.is-confirming .settings-row-value {
+  color: #ff8f7e;
+}
+
+.daily-bonus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.daily-bonus-streak {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(236, 202, 125, 0.8);
+}
+
+/* ------------------------------------------------------------- Guide sheet */
+
+.guide-prose {
+  padding: 0 2px;
+}
+.guide-prose p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+}
+.guide-prose p:last-child {
+  margin-bottom: 0;
+}
+.guide-prose strong,
+.guide-note strong {
+  color: var(--gold);
+  font-weight: 700;
+}
+.guide-note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 8px 4px 12px;
+}
+.guide-move > span:first-child {
+  font-weight: 700;
+}
+.guide-move-desc {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: right;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 4px 4px 14px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.legend-item .chart-cell {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+.chart-block {
+  margin-bottom: 16px;
+}
+.chart-caption {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 2px 6px;
+}
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.chart-row {
+  display: flex;
+  gap: 3px;
+}
+.chart-cell {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.chart-rowlabel {
+  flex: 1.5;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+}
+.chart-head .chart-cell {
+  height: 20px;
+}
+.chart-colhead {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+.act-hit {
+  background: #c0392b;
+  color: #fff;
+}
+.act-stand {
+  background: #1f7a44;
+  color: #fff;
+}
+.act-double {
+  background: #2f6fb0;
+  color: #fff;
+}
+.act-split {
+  background: #6c3fb0;
+  color: #fff;
+}
+.act-surrender {
+  background: #5a5f66;
+  color: #fff;
+}
+
 /* ----------------------------------------------------------- Small phones */
 
 @media (max-height: 700px) {
@@ -1112,5 +1366,19 @@ body {
   :root {
     --card-w: 52px;
     --card-h: 74px;
+  }
+}
+
+/* --------------------------------------------- Large screens (web app) */
+
+/* On the desktop / tablet web the app is framed as a centred phone-width
+   column so the layout reads as intentional instead of stretched edge-to-edge. */
+@media (min-width: 520px) {
+  body {
+    background: #050d09;
+  }
+  .app {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 26px 80px rgba(0, 0, 0, 0.6);
   }
 }

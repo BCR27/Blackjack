@@ -9,13 +9,14 @@ import {
 } from '../game/engine'
 import { basicStrategy, type Action } from '../game/strategy'
 import { CHIP_DENOMINATIONS, MIN_BET } from '../game/rules'
-import { today } from '../game/stats'
+import { dailyBonusFor, today, yesterday } from '../game/stats'
 import { Chip } from './Chip'
 
 function BettingDock() {
   const game = useGameStore((s) => s.game)
   const lastBet = useGameStore((s) => s.lastBet)
   const lastBonusDate = useGameStore((s) => s.lastBonusDate)
+  const bonusStreak = useGameStore((s) => s.bonusStreak)
   const addChip = useGameStore((s) => s.addChip)
   const clearBet = useGameStore((s) => s.clearBet)
   const rebet = useGameStore((s) => s.rebet)
@@ -26,6 +27,8 @@ function BettingDock() {
   const { bankroll, bet } = game
   const broke = bankroll < MIN_BET && bet === 0
   const canClaimBonus = lastBonusDate !== today()
+  const nextStreak = lastBonusDate === yesterday() ? bonusStreak + 1 : 1
+  const nextBonus = dailyBonusFor(nextStreak)
 
   if (broke) {
     return (
@@ -44,7 +47,10 @@ function BettingDock() {
     <div className="dock-betting">
       {canClaimBonus && (
         <button className="daily-bonus" onClick={claimDailyBonus}>
-          🎁 Claim daily bonus +$500
+          <span>🎁 Claim daily bonus +${nextBonus.toLocaleString()}</span>
+          {nextStreak > 1 && (
+            <span className="daily-bonus-streak">Day {nextStreak} streak</span>
+          )}
         </button>
       )}
 

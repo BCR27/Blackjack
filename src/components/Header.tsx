@@ -1,12 +1,13 @@
 import { useGameStore } from '../store/useGameStore'
-import { ChartIcon, GearIcon } from './icons'
+import { ChartIcon, GearIcon, HelpIcon } from './icons'
 
 interface HeaderProps {
   onOpenSettings: () => void
   onOpenStats: () => void
+  onOpenGuide: () => void
 }
 
-export function Header({ onOpenSettings, onOpenStats }: HeaderProps) {
+export function Header({ onOpenSettings, onOpenStats, onOpenGuide }: HeaderProps) {
   const bankroll = useGameStore((s) => s.game.bankroll)
 
   return (
@@ -20,6 +21,9 @@ export function Header({ onOpenSettings, onOpenStats }: HeaderProps) {
       </div>
       <div className="wordmark">21</div>
       <div className="header-actions">
+        <button className="icon-button" onClick={onOpenGuide} aria-label="How to play">
+          <HelpIcon />
+        </button>
         <button className="icon-button" onClick={onOpenStats} aria-label="Stats">
           <ChartIcon />
         </button>

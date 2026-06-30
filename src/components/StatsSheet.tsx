@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useGameStore } from '../store/useGameStore'
 import { ACHIEVEMENTS } from '../game/stats'
 import { Sheet } from './Sheet'
@@ -12,11 +13,34 @@ function money(n: number): string {
   return `${sign}$${Math.abs(n).toLocaleString()}`
 }
 
+function ResetStatsRow() {
+  const resetStats = useGameStore((s) => s.resetStats)
+  const [confirm, setConfirm] = useState(false)
+
+  return (
+    <button
+      className={`settings-row settings-row-button ${confirm ? 'is-confirming' : ''}`}
+      onClick={() => {
+        if (confirm) {
+          resetStats()
+          setConfirm(false)
+        } else {
+          setConfirm(true)
+        }
+      }}
+      onBlur={() => setConfirm(false)}
+    >
+      <span>
+        {confirm ? 'Tap again to confirm' : 'Reset stats & achievements'}
+      </span>
+    </button>
+  )
+}
+
 export function StatsSheet({ onClose }: { onClose: () => void }) {
   const stats = useGameStore((s) => s.stats)
   const history = useGameStore((s) => s.history)
   const achievements = useGameStore((s) => s.achievements)
-  const resetStats = useGameStore((s) => s.resetStats)
 
   const cards: { label: string; value: string }[] = [
     { label: 'Hands', value: stats.hands.toLocaleString() },
@@ -89,9 +113,7 @@ export function StatsSheet({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="settings-group" style={{ marginTop: 14 }}>
-        <button className="settings-row settings-row-button" onClick={resetStats}>
-          <span>Reset stats &amp; achievements</span>
-        </button>
+        <ResetStatsRow />
       </div>
     </Sheet>
   )

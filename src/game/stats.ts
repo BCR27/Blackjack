@@ -117,10 +117,29 @@ export function satisfiedAchievements(ctx: AchievementContext): string[] {
   return ids
 }
 
-/** Local calendar date as YYYY-MM-DD, for the once-per-day bonus. */
-export function today(): string {
-  const d = new Date()
+function dateKey(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
 }
 
-export const DAILY_BONUS = 500
+/** Local calendar date, for the once-per-day bonus. */
+export function today(): string {
+  return dateKey(new Date())
+}
+
+/** Yesterday's local calendar date, for detecting a continued login streak. */
+export function yesterday(): string {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  return dateKey(d)
+}
+
+// Daily bonus grows with the login streak to reward coming back, then caps.
+export const DAILY_BONUS_BASE = 500
+export const DAILY_BONUS_STEP = 100
+export const DAILY_BONUS_MAX = 1500
+
+/** Bonus payout for the given streak day (day 1 = base, capped at the max). */
+export function dailyBonusFor(streakDay: number): number {
+  const day = Math.max(1, streakDay)
+  return Math.min(DAILY_BONUS_MAX, DAILY_BONUS_BASE + (day - 1) * DAILY_BONUS_STEP)
+}

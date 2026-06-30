@@ -28,11 +28,12 @@ import {
 import { basicStrategy, type Action } from '../game/strategy'
 import {
   ACHIEVEMENTS,
-  DAILY_BONUS,
+  dailyBonusFor,
   initialStats,
   recordRound,
   satisfiedAchievements,
   today,
+  yesterday,
   type HistoryEntry,
   type Stats,
 } from '../game/stats'
@@ -60,6 +61,7 @@ interface Store {
   history: HistoryEntry[]
   achievements: string[]
   lastBonusDate: string
+  bonusStreak: number
   toasts: Toast[]
 
   addChip: (value: number) => void
@@ -215,6 +217,7 @@ export const useGameStore = create<Store>()(
         history: [],
         achievements: [],
         lastBonusDate: '',
+        bonusStreak: 0,
         toasts: [],
 
         addChip: (value) => {
@@ -371,14 +374,19 @@ export const useGameStore = create<Store>()(
         },
 
         claimDailyBonus: () => {
-          if (get().lastBonusDate === today()) return
-          const { game } = get()
+          const { game, lastBonusDate, bonusStreak } = get()
+          if (lastBonusDate === today()) return
+          // Continue the streak only if the last claim was yesterday.
+          const streak = lastBonusDate === yesterday() ? bonusStreak + 1 : 1
+          const bonus = dailyBonusFor(streak)
+          const streakNote = streak > 1 ? ` · ${streak}-day streak` : ''
           set({
-            game: { ...game, bankroll: game.bankroll + DAILY_BONUS },
+            game: { ...game, bankroll: game.bankroll + bonus },
             lastBonusDate: today(),
+            bonusStreak: streak,
             toasts: [
               ...get().toasts,
-              { id: nextToastId(), text: `Daily bonus +$${DAILY_BONUS}` },
+              { id: nextToastId(), text: `Daily bonus +$${bonus}${streakNote}` },
             ],
           })
           playSound('win')
@@ -424,6 +432,7 @@ export const useGameStore = create<Store>()(
         history: s.history,
         achievements: s.achievements,
         lastBonusDate: s.lastBonusDate,
+        bonusStreak: s.bonusStreak,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<{
@@ -440,6 +449,7 @@ export const useGameStore = create<Store>()(
           history: HistoryEntry[]
           achievements: string[]
           lastBonusDate: string
+          bonusStreak: number
         }>
         // Surrender has been removed from the game; force it off even for
         // returning players who previously had it enabled.
@@ -463,6 +473,7 @@ export const useGameStore = create<Store>()(
           history: p.history ?? [],
           achievements: p.achievements ?? [],
           lastBonusDate: p.lastBonusDate ?? '',
+          bonusStreak: p.bonusStreak ?? 0,
         }
       },
     },

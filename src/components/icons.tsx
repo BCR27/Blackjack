@@ -60,6 +60,26 @@ export function ChartIcon({ size = 22, className }: IconProps) {
   )
 }
 
+export function HelpIcon({ size = 22, className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.2 9.2a2.8 2.8 0 0 1 5.5.8c0 1.9-2.8 2.5-2.8 4" />
+      <path d="M12 17.5h.01" />
+    </svg>
+  )
+}
+
 export function ChevronIcon({ size = 18, className }: IconProps) {
   return (
     <svg
