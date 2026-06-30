@@ -11,21 +11,36 @@ import {
 import { ChevronIcon } from './icons'
 import { Sheet } from './Sheet'
 
-function Toggle({
+/**
+ * A full-width settings row that toggles when tapped anywhere on it (not just on
+ * the small switch), with a pressed state — much easier to hit on touch.
+ */
+function ToggleRow({
+  label,
+  sub,
   checked,
   onChange,
 }: {
+  label: string
+  sub?: string
   checked: boolean
   onChange: () => void
 }) {
   return (
     <button
+      type="button"
       role="switch"
       aria-checked={checked}
-      className={`toggle ${checked ? 'toggle-on' : ''}`}
+      className="settings-row settings-row-toggle"
       onClick={onChange}
     >
-      <span className="toggle-knob" />
+      <span className="settings-row-label">
+        {label}
+        {sub ? <span className="settings-row-sub">{sub}</span> : null}
+      </span>
+      <span className={`toggle ${checked ? 'toggle-on' : ''}`} aria-hidden="true">
+        <span className="toggle-knob" />
+      </span>
     </button>
   )
 }
@@ -143,31 +158,25 @@ function CustomRules() {
               ]}
             />
           </div>
-          <div className="settings-row">
-            <span>Dealer hits soft 17</span>
-            <Toggle
-              checked={rules.dealerHitsSoft17}
-              onChange={() =>
-                updateRules({ dealerHitsSoft17: !rules.dealerHitsSoft17 })
-              }
-            />
-          </div>
-          <div className="settings-row">
-            <span>Double after split</span>
-            <Toggle
-              checked={rules.doubleAfterSplit}
-              onChange={() =>
-                updateRules({ doubleAfterSplit: !rules.doubleAfterSplit })
-              }
-            />
-          </div>
-          <div className="settings-row">
-            <span>Re-split aces</span>
-            <Toggle
-              checked={rules.resplitAces}
-              onChange={() => updateRules({ resplitAces: !rules.resplitAces })}
-            />
-          </div>
+          <ToggleRow
+            label="Dealer hits soft 17"
+            checked={rules.dealerHitsSoft17}
+            onChange={() =>
+              updateRules({ dealerHitsSoft17: !rules.dealerHitsSoft17 })
+            }
+          />
+          <ToggleRow
+            label="Double after split"
+            checked={rules.doubleAfterSplit}
+            onChange={() =>
+              updateRules({ doubleAfterSplit: !rules.doubleAfterSplit })
+            }
+          />
+          <ToggleRow
+            label="Re-split aces"
+            checked={rules.resplitAces}
+            onChange={() => updateRules({ resplitAces: !rules.resplitAces })}
+          />
         </>
       )}
     </div>
@@ -223,20 +232,18 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
       <div className="settings-section-title">Coaching</div>
       <div className="settings-group">
-        <div className="settings-row">
-          <span>
-            Strategy hints
-            <span className="settings-row-sub">Highlight the optimal play</span>
-          </span>
-          <Toggle checked={coachEnabled} onChange={toggleCoach} />
-        </div>
-        <div className="settings-row">
-          <span>
-            Card-counting trainer
-            <span className="settings-row-sub">Show the live Hi-Lo count</span>
-          </span>
-          <Toggle checked={countingEnabled} onChange={toggleCounting} />
-        </div>
+        <ToggleRow
+          label="Strategy hints"
+          sub="Highlight the optimal play"
+          checked={coachEnabled}
+          onChange={toggleCoach}
+        />
+        <ToggleRow
+          label="Card-counting trainer"
+          sub="Show the live Hi-Lo count"
+          checked={countingEnabled}
+          onChange={toggleCounting}
+        />
       </div>
 
       <div className="settings-section-title">Appearance</div>
@@ -269,14 +276,16 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
       <div className="settings-section-title">Feel</div>
       <div className="settings-group">
-        <div className="settings-row">
-          <span>Sound effects</span>
-          <Toggle checked={soundEnabled} onChange={toggleSound} />
-        </div>
-        <div className="settings-row">
-          <span>Haptics</span>
-          <Toggle checked={hapticsEnabled} onChange={toggleHaptics} />
-        </div>
+        <ToggleRow
+          label="Sound effects"
+          checked={soundEnabled}
+          onChange={toggleSound}
+        />
+        <ToggleRow
+          label="Haptics"
+          checked={hapticsEnabled}
+          onChange={toggleHaptics}
+        />
       </div>
 
       <div className="settings-section-title">Bankroll</div>

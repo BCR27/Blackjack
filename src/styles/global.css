@@ -821,14 +821,34 @@ body {
   align-items: stretch;
   gap: 11px;
 }
-.settings-row-button {
+.settings-row-button,
+.settings-row-toggle {
   width: 100%;
   background: none;
   border-top: none;
   border-left: none;
   border-right: none;
   font-family: inherit;
+  font-size: 16px;
+  color: #fff;
+  text-align: left;
   cursor: pointer;
+}
+/* The global tap-highlight reset kills the native press cue, so menu rows get
+   an explicit pressed state to feel reactive on touch. */
+.settings-row-button:active,
+.settings-row-toggle:active {
+  background: rgba(255, 255, 255, 0.07);
+}
+.settings-row-label {
+  display: flex;
+  flex-direction: column;
+}
+.settings-row-toggle:active .toggle {
+  transform: scale(0.93);
+}
+.disclosure:active .disclosure-chevron {
+  color: #fff;
 }
 .settings-row-value {
   color: var(--gold);
@@ -850,7 +870,7 @@ body {
   border: none;
   position: relative;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.12s;
   flex: none;
 }
 .toggle-on {
@@ -886,10 +906,16 @@ body {
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
-  padding: 8px;
+  padding: 11px 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.segmented-item:active {
+  transform: scale(0.95);
+}
+.segmented-item:not(.is-active):active {
+  background: rgba(255, 255, 255, 0.1);
 }
 .segmented-item.is-active {
   background: rgba(255, 255, 255, 0.18);
@@ -1182,13 +1208,18 @@ body {
   flex: 1;
   border: none;
   background: none;
-  padding: 4px 2px;
+  padding: 9px 2px;
   font-family: inherit;
   font-size: 11px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   border-radius: 8px;
+  transition: color 0.12s, transform 0.1s;
+}
+.difficulty-tick:active {
+  transform: scale(0.9);
+  color: var(--gold);
 }
 .difficulty-tick:first-child {
   text-align: left;
